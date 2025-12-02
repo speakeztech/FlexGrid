@@ -4,6 +4,8 @@
 
 <!-- TODO: Add presentation video link when available -->
 
+![FlexGrid Screenshot](screenshot-2025-12-02_18-30-13.png)
+
 ## The Insight
 
 Over 1.5 billion people use spreadsheets daily. Every one of them is doing functional programming. They just don't use programming jargon.
