@@ -35,7 +35,7 @@ Spreadsheets succeed *because* of the very nature of functional language design.
 
 The properties that make spreadsheet models trustworthy: predictable results, auditable calculation chains, no hidden state are precisely the properties that functional programming provides.
 
-When advocating for functional programming in your organization, you're not asking leadership to trust something foreign. You're asking them to recognize that the principles they already trust in their spreadsheets apply equally to the large-scale systems that run their business.
+🔑 When advocating for functional programming in your organization, you're not asking leadership to trust something foreign. You're asking them to recognize that the principles they already trust in their spreadsheets apply equally to the large-scale systems that run their business.
 
 ## How It Works
 
