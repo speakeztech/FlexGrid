@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom spreadsheet styles */
+@layer components {
+  .cell-base {
+    @apply border border-gray-300 px-2 py-1 text-right font-mono text-sm;
+  }
+
+  .cell-input {
+    @apply cell-base bg-yellow-50;
+  }
+
+  .cell-input:focus-within {
+    @apply bg-yellow-100 outline-none ring-2 ring-blue-400;
+  }
+
+  .cell-formula {
+    @apply cell-base bg-white;
+  }
+
+  .cell-label {
+    @apply cell-base bg-gray-100 text-left font-sans;
+  }
+
+  .cell-header {
+    @apply cell-base bg-gray-200 font-semibold text-center;
+  }
+
+  .cell-error {
+    @apply cell-base bg-red-100 text-red-700;
+  }
+
+  .spreadsheet-table {
+    @apply border-collapse shadow-lg rounded-lg overflow-hidden;
+  }
+
+  .spreadsheet-input {
+    @apply w-full bg-transparent text-right outline-none;
+  }
+}

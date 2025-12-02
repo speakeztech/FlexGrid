@@ -1,0 +1,151 @@
+namespace FlexGrid.Solid
+
+open Fable.Core
+open Fable.Core.JsInterop
+open Browser.Types
+open Partas.Solid
+
+/// Input cell component: editable, creates a signal
+[<Erase>]
+type InputCell() =
+    inherit td()
+
+    /// The signal accessor for the cell value
+    [<Erase>]
+    member val signal: Accessor<float> = Unchecked.defaultof<_> with get, set
+
+    /// The setter function for the cell value
+    [<Erase>]
+    member val setSignal: (float -> unit) = Unchecked.defaultof<_> with get, set
+
+    /// Optional format string for display
+    [<Erase>]
+    member val format: string option = None with get, set
+
+    /// The cell name (for display purposes)
+    [<Erase>]
+    member val name: string = "" with get, set
+
+    [<SolidTypeComponent>]
+    member props.constructor =
+        let formatValue (v: float) =
+            match props.format with
+            | Some fmt ->
+                // Simple format handling
+                if fmt.Contains("N") || fmt.Contains("F") then
+                    let decimals =
+                        fmt.Replace("N", "").Replace("F", "")
+                        |> fun s -> if s = "" then 2 else int s
+                    v.ToString($"F{decimals}")
+                elif fmt.Contains("C") then
+                    "$" + v.ToString("F2")
+                elif fmt.Contains("P") then
+                    (v * 100.0).ToString("F1") + "%"
+                else
+                    v.ToString()
+            | None -> v.ToString("F2")
+
+        let handleInput (e: Event) =
+            let target = e.target :?> HTMLInputElement
+            match System.Double.TryParse(target.value) with
+            | true, v -> props.setSignal v
+            | false, _ -> () // Ignore invalid input
+
+        td(class' = Styles.inputCell, title = props.name) {
+            input(
+                type' = "text",
+                class' = Styles.cellInput,
+                value = formatValue(props.signal()),
+                onInput = handleInput
+            )
+        }
+
+/// Formula cell component: displays computed value
+[<Erase>]
+type FormulaCell() =
+    inherit td()
+
+    /// The signal accessor for the computed value
+    [<Erase>]
+    member val signal: Accessor<float> = Unchecked.defaultof<_> with get, set
+
+    /// Optional format string for display
+    [<Erase>]
+    member val format: string option = None with get, set
+
+    /// The formula expression (shown on hover)
+    [<Erase>]
+    member val formula: string = "" with get, set
+
+    [<SolidTypeComponent>]
+    member props.constructor =
+        let formatValue (v: float) =
+            if System.Double.IsNaN(v) then
+                "#ERROR"
+            elif System.Double.IsInfinity(v) then
+                "#DIV/0!"
+            else
+                match props.format with
+                | Some fmt ->
+                    if fmt.Contains("N") || fmt.Contains("F") then
+                        let decimals =
+                            fmt.Replace("N", "").Replace("F", "")
+                            |> fun s -> if s = "" then 2 else int s
+                        v.ToString($"F{decimals}")
+                    elif fmt.Contains("C") then
+                        "$" + v.ToString("F2")
+                    elif fmt.Contains("P") then
+                        (v * 100.0).ToString("F1") + "%"
+                    else
+                        v.ToString()
+                | None -> v.ToString("F2")
+
+        let value = props.signal()
+        let cellClass =
+            if System.Double.IsNaN(value) || System.Double.IsInfinity(value) then
+                Styles.errorCell
+            else
+                Styles.formulaCell
+
+        td(class' = cellClass, title = props.formula) {
+            formatValue(value)
+        }
+
+/// Label cell component: static text
+[<Erase>]
+type LabelCell() =
+    inherit td()
+
+    /// The text to display
+    [<Erase>]
+    member val text: string = "" with get, set
+
+    [<SolidTypeComponent>]
+    member props.constructor =
+        td(class' = Styles.labelCell) {
+            props.text
+        }
+
+/// Header cell component: column/row labels
+[<Erase>]
+type HeaderCell() =
+    inherit th()
+
+    /// The header text (A, B, C... or 1, 2, 3...)
+    [<Erase>]
+    member val text: string = "" with get, set
+
+    [<SolidTypeComponent>]
+    member props.constructor =
+        th(class' = Styles.headerCell) {
+            props.text
+        }
+
+/// Empty cell component
+[<Erase>]
+type EmptyCell() =
+    inherit td()
+
+    [<SolidTypeComponent>]
+    member props.constructor =
+        td(class' = Styles.emptyCell) { "" }

@@ -1,0 +1,37 @@
+{
+  "name": "flexgrid",
+  "version": "0.1.0",
+  "description": "Reactive spreadsheet demonstrations bridging FsExcel with Partas.Solid",
+  "type": "module",
+  "scripts": {
+    "restore": "dotnet restore",
+    "fable": "dotnet fable demos --exclude Partas.Solid.FablePlugin --noCache -o output -e .fs.jsx -c Release",
+    "fable:watch": "dotnet fable watch demos --exclude Partas.Solid.FablePlugin --noCache -o output -e .fs.jsx -c Release",
+    "dev": "npm run fable && vite",
+    "dev:watch": "concurrently \"npm run fable:watch\" \"vite\"",
+    "build": "npm run fable && vite build",
+    "preview": "vite preview",
+    "test": "dotnet test tests"
+  },
+  "dependencies": {
+    "solid-js": "^1.8.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "vite": "^5.0.0",
+    "vite-plugin-solid": "^2.8.0",
+    "tailwindcss": "^3.4.0",
+    "postcss": "^8.4.32",
+    "autoprefixer": "^10.4.16"
+  },
+  "keywords": [
+    "fsharp",
+    "solid-js",
+    "spreadsheet",
+    "reactive",
+    "excel",
+    "functional-programming"
+  ],
+  "author": "",
+  "license": "MIT"
+}

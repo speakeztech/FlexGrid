@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Description>Partas.Solid components for reactive spreadsheet rendering</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Fable.Core" Version="5.0.0-beta.1" />
+    <PackageReference Include="Fable.Browser.Dom" Version="2.20.0" />
+    <PackageReference Include="Partas.Solid" Version="2.1.3" />
+    <PackageReference Include="Partas.Solid.FablePlugin" Version="2.1.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FlexGrid\FlexGrid.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Styles.fs" />
+    <Compile Include="Components.fs" />
+    <Compile Include="Grid.fs" />
+    <Compile Include="Render.fs" />
+  </ItemGroup>
+
+</Project>

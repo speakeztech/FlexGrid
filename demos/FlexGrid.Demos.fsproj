@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Description>Demo applications for FlexGrid reactive spreadsheets</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Fable.Core" Version="5.0.0-beta.1" />
+    <PackageReference Include="Fable.Browser.Dom" Version="2.20.0" />
+    <PackageReference Include="Partas.Solid" Version="2.1.3" />
+    <PackageReference Include="Partas.Solid.FablePlugin" Version="2.1.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\src\FlexGrid\FlexGrid.fsproj" />
+    <ProjectReference Include="..\src\FlexGrid.Solid\FlexGrid.Solid.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="CompoundInterest.fs" />
+    <Compile Include="MortgageCalculator.fs" />
+    <Compile Include="App.fs" />
+  </ItemGroup>
+
+</Project>
