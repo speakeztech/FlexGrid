@@ -2,12 +2,12 @@ module FlexGrid.Demos.CompoundInterest
 
 open FlexGrid
 
-/// Build the compound interest demonstration spreadsheet
+/// Build the loan return (investment growth) demonstration spreadsheet
 let build () =
     let builder = reactiveSheet()
 
     // Title area
-    builder.Label("Compound Interest Calculator")
+    builder.Label("Loan Return Calculator")
     builder.Skip(2)
     builder.NewRow()
     builder.NewRow()
@@ -27,28 +27,31 @@ let build () =
     builder.NewRow()
 
     // Result section
-    builder.Label("Future Value")
+    builder.Label("Total Return")
     builder.Formula("=principal*(1+rate/100)^years", format = "C2")
     builder.NewRow()
     builder.NewRow()
 
     // Year-by-year breakdown header
     builder.Label("Year")
-    builder.Label("Balance")
+    builder.Label("Value")
     builder.Label("Interest Earned")
     builder.NewRow()
 
-    // Generate rows for years 1-10
+    // Generate rows for years 1-10 (conditionally shown based on years input)
     for year in 1 .. 10 do
-        builder.Label(string year)
-        builder.Formula($"=principal*(1+rate/100)^{year}", format = "C2")
+        // Year label - show blank if beyond selected years
+        builder.Formula($"=IF({year}<=years,{year},BLANK())", format = "N0")
+        // Value - show blank if beyond selected years
+        builder.Formula($"=IF({year}<=years,principal*(1+rate/100)^{year},BLANK())", format = "C2")
+        // Interest earned - show blank if beyond selected years
         if year = 1 then
-            builder.Formula($"=principal*(1+rate/100)^{year}-principal", format = "C2")
+            builder.Formula($"=IF({year}<=years,principal*(1+rate/100)^{year}-principal,BLANK())", format = "C2")
         else
-            builder.Formula($"=principal*(1+rate/100)^{year}-principal*(1+rate/100)^{year-1}", format = "C2")
+            builder.Formula($"=IF({year}<=years,principal*(1+rate/100)^{year}-principal*(1+rate/100)^{year-1},BLANK())", format = "C2")
         builder.NewRow()
 
-    builder.Title("Compound Interest Calculator")
+    builder.Title("Loan Return Calculator")
     builder.Build()
 
 /// Pure F# equivalent functions for side-by-side comparison

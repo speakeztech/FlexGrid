@@ -23,7 +23,7 @@ type ThemeToggle() =
     member props.constructor =
         let titleText = if props.isDark() then "Switch to light mode" else "Switch to dark mode"
         button(
-            class' = "p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-xl",
+            class' = "p-2 rounded-lg bg-slate-200 dark:bg-speakez-neutral hover:bg-slate-300 dark:hover:bg-speakez-neutral/80 transition-colors text-xl",
             onClick = (fun _ -> props.onToggle()),
             title = titleText
         ) {
@@ -34,6 +34,71 @@ type ThemeToggle() =
             // Moon emoji (shown in light mode)
             Show(when' = not (props.isDark())) {
                 span(class' = "select-none") { "\uD83C\uDF19" } // Crescent moon emoji
+            }
+        }
+
+/// SVG icon for side-by-side layout (two boxes next to each other)
+[<Erase>]
+type SideBySideIcon() =
+    inherit span()
+
+    [<SolidTypeComponent>]
+    member props.constructor =
+        span(class' = "inline-flex items-center justify-center w-5 h-5") {
+            // Two rectangles side by side
+            span(class' = "inline-flex gap-0.5") {
+                span(class' = "w-2 h-3 border border-current rounded-sm")
+                span(class' = "w-2 h-3 border border-current rounded-sm")
+            }
+        }
+
+/// SVG icon for stacked layout (two boxes on top of each other)
+[<Erase>]
+type StackedIcon() =
+    inherit span()
+
+    [<SolidTypeComponent>]
+    member props.constructor =
+        span(class' = "inline-flex flex-col items-center justify-center w-5 h-5") {
+            // Two rectangles stacked vertically
+            span(class' = "inline-flex flex-col gap-0.5") {
+                span(class' = "w-3 h-1.5 border border-current rounded-sm")
+                span(class' = "w-3 h-1.5 border border-current rounded-sm")
+            }
+        }
+
+/// Layout toggle component (stacked vs side-by-side)
+[<Erase>]
+type LayoutToggle() =
+    inherit button()
+
+    [<Erase>]
+    member val isSideBySide: Accessor<bool> = Unchecked.defaultof<_> with get, set
+
+    [<Erase>]
+    member val onToggle: (unit -> unit) = Unchecked.defaultof<_> with get, set
+
+    [<SolidTypeComponent>]
+    member props.constructor =
+        let titleText = if props.isSideBySide() then "Switch to stacked layout" else "Switch to side-by-side layout"
+        button(
+            class' = "p-2 rounded-lg bg-slate-200 dark:bg-speakez-neutral hover:bg-slate-300 dark:hover:bg-speakez-neutral/80 transition-colors text-sm font-medium text-speakez-neutral dark:text-speakez-neutral-light",
+            onClick = (fun _ -> props.onToggle()),
+            title = titleText
+        ) {
+            // Side-by-side icon (shown when stacked) - clicking switches TO side-by-side
+            Show(when' = not (props.isSideBySide())) {
+                span(class' = "select-none flex items-center gap-1.5") {
+                    SideBySideIcon()
+                    span(class' = "hidden sm:inline") { "Side-by-Side" }
+                }
+            }
+            // Stacked icon (shown when side-by-side) - clicking switches TO stacked
+            Show(when' = props.isSideBySide()) {
+                span(class' = "select-none flex items-center gap-1.5") {
+                    StackedIcon()
+                    span(class' = "hidden sm:inline") { "Stacked" }
+                }
             }
         }
 
@@ -49,11 +114,11 @@ type DemoSelector() =
     member props.constructor =
         div(class' = "mb-6 flex gap-4") {
             button(
-                class' = "px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition",
+                class' = "btn-speakez-teal",
                 onClick = fun _ -> props.onSelect "compound"
-            ) { "Compound Interest" }
+            ) { "Loan Return" }
             button(
-                class' = "px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition",
+                class' = "btn-speakez-blue",
                 onClick = fun _ -> props.onSelect "mortgage"
             ) { "Mortgage Calculator" }
         }
@@ -81,6 +146,13 @@ module App =
 
         let isDark, setIsDark = createSignal initialDark
 
+        // Check initial layout from localStorage or default to false (stacked)
+        let initialSideBySide =
+            let stored = window.localStorage.getItem("layout")
+            stored = "side-by-side"
+
+        let isSideBySide, setIsSideBySide = createSignal initialSideBySide
+
         let toggleTheme () =
             let newDark = not (isDark())
             setIsDark newDark
@@ -91,76 +163,78 @@ module App =
                 document.documentElement.classList.remove("dark")
                 window.localStorage.setItem("theme", "light")
 
+        let toggleLayout () =
+            let newSideBySide = not (isSideBySide())
+            setIsSideBySide newSideBySide
+            if newSideBySide then
+                window.localStorage.setItem("layout", "side-by-side")
+            else
+                window.localStorage.setItem("layout", "stacked")
+
         let getModel () =
             match currentDemo() with
             | "mortgage" -> MortgageCalculator.build()
             | _ -> CompoundInterest.build()
 
-        div(class' = "min-h-screen bg-gray-50 dark:bg-gray-900 py-8 transition-colors") {
-            div(class' = "max-w-4xl mx-auto px-4") {
-                // Header with theme toggle
+        div(class' = "min-h-screen bg-speakez-neutral-light dark:bg-speakez-neutral-dark py-8 transition-colors") {
+            div(class' = "max-w-6xl mx-auto px-4") {
+                // Header with controls
                 div(class' = "mb-8 flex justify-between items-start") {
                     div() {
-                        h1(class' = "text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2") {
+                        h1(class' = "text-3xl font-bold font-heading text-speakez-neutral dark:text-speakez-neutral-light mb-2") {
                             "FlexGrid Demo"
                         }
-                        p(class' = "text-gray-600 dark:text-gray-400") {
+                        p(class' = "text-speakez-neutral/70 dark:text-speakez-neutral-light/70") {
                             "Reactive spreadsheets demonstrating functional programming principles"
                         }
                     }
-                    ThemeToggle(isDark = isDark, onToggle = toggleTheme)
+                    div(class' = "flex gap-2") {
+                        LayoutToggle(isSideBySide = isSideBySide, onToggle = toggleLayout)
+                        ThemeToggle(isDark = isDark, onToggle = toggleTheme)
+                    }
                 }
 
                 // Demo selector
                 DemoSelector(onSelect = setCurrentDemo)
 
                 // Description panel
-                div(class' = "mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg shadow") {
-                    h3(class' = "font-semibold mb-2 text-gray-800 dark:text-gray-100") { "About this demo" }
-                    p(class' = "text-sm text-gray-600 dark:text-gray-400") {
+                div(class' = "mb-6 p-4 card-speakez") {
+                    h3(class' = "font-semibold font-heading mb-2 text-speakez-neutral dark:text-speakez-neutral-light") { "About this demo" }
+                    p(class' = "text-sm text-speakez-neutral/70 dark:text-speakez-neutral-light/70") {
                         "Yellow cells are editable inputs. White cells show computed formulas. " +
                         "Hover over formula cells to see the underlying expression. " +
                         "Edit any input value and watch the dependent cells update reactively."
                     }
                 }
 
-                // Spreadsheet
-                div(class' = "bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden") {
-                    SpreadsheetRenderer.SpreadsheetApp (getModel())
-                }
-
-                // Calculation Log Panel (accordion)
-                LiveLogPanel()
-
-                // F# Code comparison
-                div(class' = "mt-8 p-4 bg-gray-800 dark:bg-gray-950 rounded-lg") {
-                    h3(class' = "text-white font-semibold mb-4") {
-                        "F# Equivalent"
+                // Main content area - conditionally side-by-side or stacked
+                Show(when' = isSideBySide()) {
+                    // Side-by-side layout with equal height columns
+                    div(class' = "grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch") {
+                        // Spreadsheet
+                        div(class' = "card-speakez h-fit") {
+                            SpreadsheetRenderer.SpreadsheetApp (getModel())
+                        }
+                        // Calculation Log Panel - matches spreadsheet height
+                        div(class' = "h-full") {
+                            LiveLogPanel(initialOpen = true, sideBySide = true)
+                        }
                     }
-                    pre(class' = "text-green-400 text-sm overflow-x-auto") {
-                        Show(when' = (currentDemo() = "compound")) {
-                            code() {
-                                "let futureValue principal rate years =\n" +
-                                "    principal * (1.0 + rate / 100.0) ** float years\n\n" +
-                                "// Excel formula: =principal*(1+rate/100)^years\n" +
-                                "// Same computation. Same semantics."
-                            }
+                }
+                Show(when' = not (isSideBySide())) {
+                    // Stacked layout
+                    div() {
+                        // Spreadsheet
+                        div(class' = "card-speakez") {
+                            SpreadsheetRenderer.SpreadsheetApp (getModel())
                         }
-                        Show(when' = (currentDemo() = "mortgage")) {
-                            code() {
-                                "let monthlyPayment loan rate years =\n" +
-                                "    let r = rate / 100.0 / 12.0\n" +
-                                "    let n = float years * 12.0\n" +
-                                "    loan * r * (1.0 + r) ** n / ((1.0 + r) ** n - 1.0)\n\n" +
-                                "// Excel formula: =PMT(rate/12, years*12, loan)\n" +
-                                "// Identical mathematics, different notation."
-                            }
-                        }
+                        // Calculation Log Panel (accordion)
+                        LiveLogPanel(initialOpen = true, sideBySide = false)
                     }
                 }
 
                 // Footer
-                div(class' = "mt-8 text-center text-gray-500 dark:text-gray-500 text-sm") {
+                div(class' = "mt-8 text-center text-speakez-neutral/50 dark:text-speakez-neutral-light/50 text-sm") {
                     p() {
                         "FlexGrid - Reactive spreadsheets in F# with Partas.Solid, proving spreadsheets are functional programming"
                     }

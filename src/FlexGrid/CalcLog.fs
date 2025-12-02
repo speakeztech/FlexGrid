@@ -95,8 +95,15 @@ module CalcLogger =
             Formula = Some formula
             OldValue = None
             NewValue = None
-            Message = sprintf "Evaluating %s: %s" (formatAddress col row) formula
+            Message = sprintf "%s: %s" (formatAddress col row) formula
         }
+
+    /// Format a result value for display in logs
+    let private formatResult (v: float) =
+        if System.Double.IsNaN(v) then "#ERROR"
+        elif System.Double.IsNegativeInfinity(v) then "Empty"
+        elif System.Double.IsPositiveInfinity(v) then "#DIV/0!"
+        else sprintf "%.4f" v
 
     /// Log completion of formula evaluation
     let logFormulaEvaluated (logger: CalcLogger) (col: int) (row: int) (formula: string) (result: float) =
@@ -107,7 +114,7 @@ module CalcLogger =
             Formula = Some formula
             OldValue = None
             NewValue = Some result
-            Message = sprintf "%s = %.4f" (formatAddress col row) result
+            Message = sprintf "%s = %s" (formatAddress col row) (formatResult result)
         }
 
     /// Log a dependency being triggered
@@ -135,8 +142,8 @@ module CalcLogger =
         let icon =
             match entry.EventType with
             | "INPUT_CHANGED" -> "[INPUT]"
-            | "FORMULA_EVALUATING" -> "[CALC>]"
-            | "FORMULA_EVALUATED" -> "[CALC=]"
+            | "FORMULA_EVALUATING" -> "[EVAL]"
+            | "FORMULA_EVALUATED" -> "[CALC]"
             | "DEPENDENCY_TRIGGERED" -> "[DEP]"
             | _ -> "[?]"
         sprintf "%s %s" icon entry.Message

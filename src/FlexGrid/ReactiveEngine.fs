@@ -135,6 +135,9 @@ module ReactiveEngine =
                     let trueVal = argSignals.[1]()
                     let falseVal = if argSignals.Length > 2 then argSignals.[2]() else 0.0
                     if condition <> 0.0 then trueVal else falseVal
+            | "BLANK" ->
+                // Returns negative infinity as a sentinel value for "blank" display
+                fun () -> System.Double.NegativeInfinity
             | "POW" | "POWER" ->
                 fun () -> (argSignals.[0]()) ** (argSignals.[1]())
             | "LOG" ->

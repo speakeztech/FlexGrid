@@ -96,7 +96,9 @@ type FormulaCell() =
         let formatValue (v: float) =
             if System.Double.IsNaN(v) then
                 "#ERROR"
-            elif System.Double.IsInfinity(v) then
+            elif System.Double.IsNegativeInfinity(v) then
+                "" // BLANK() returns negative infinity - display as empty
+            elif System.Double.IsPositiveInfinity(v) then
                 "#DIV/0!"
             else
                 match props.format with
@@ -115,8 +117,10 @@ type FormulaCell() =
                 | None -> v.ToString("F2")
 
         let getCellClass (v: float) =
-            if System.Double.IsNaN(v) || System.Double.IsInfinity(v) then
+            if System.Double.IsNaN(v) || System.Double.IsPositiveInfinity(v) then
                 Styles.errorCell
+            elif System.Double.IsNegativeInfinity(v) then
+                Styles.emptyCell // BLANK() gets empty cell styling
             else
                 Styles.formulaCell
 
