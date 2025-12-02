@@ -1,4 +1,4 @@
-namespace FlexGrid.Solid
+namespace Partas.Solid.FlexGrid
 
 /// CSS class definitions for spreadsheet components
 module Styles =

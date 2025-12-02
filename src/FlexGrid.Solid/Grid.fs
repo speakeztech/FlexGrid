@@ -1,7 +1,7 @@
-namespace FlexGrid.Solid
+namespace Partas.Solid.FlexGrid
 
 open Fable.Core
-open Partas.Solid
+open global.Partas.Solid
 
 /// Complete spreadsheet grid component
 [<Erase>]
@@ -97,10 +97,15 @@ type Spreadsheet() =
 
     [<SolidTypeComponent>]
     member props.constructor =
+        // Access title directly in the JSX expression to avoid erased getter issues
+        let titleValue = props.title
+        let hasTitle = titleValue <> None
+        let titleText = titleValue |> Option.defaultValue ""
+
         div(class' = Styles.spreadsheetContainer) {
-            Show(when' = props.title.IsSome) {
+            Show(when' = hasTitle) {
                 h2(class' = Styles.spreadsheetTitle) {
-                    props.title |> Option.defaultValue ""
+                    titleText
                 }
             }
             SpreadsheetGrid(

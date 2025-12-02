@@ -1,9 +1,9 @@
-namespace FlexGrid.Solid
+namespace Partas.Solid.FlexGrid
 
 open Fable.Core
 open Fable.Core.JsInterop
 open Browser.Types
-open Partas.Solid
+open global.Partas.Solid
 
 /// Input cell component: editable, creates a signal
 [<Erase>]

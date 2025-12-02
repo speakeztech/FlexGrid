@@ -117,9 +117,10 @@ FlexGrid/
 
 ### Prerequisites
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download) (10.0.100 or later)
 - [Node.js](https://nodejs.org/) (v18+)
-- [Fable](https://fable.io/) (`dotnet tool install -g fable`)
+
+Fable 5 is installed as a local tool and will be restored automatically.
 
 ### Installation
 
@@ -127,6 +128,9 @@ FlexGrid/
 # Clone the repository
 git clone https://github.com/yourusername/FlexGrid.git
 cd FlexGrid
+
+# Restore .NET tools (Fable 5)
+dotnet tool restore
 
 # Restore .NET packages
 dotnet restore
@@ -200,12 +204,14 @@ Additional functions can be added to [ReactiveEngine.fs](src/FlexGrid/ReactiveEn
 
 ## Dependencies
 
-- **[FsExcel](https://github.com/misterspeedy/FsExcel)** - Declarative Excel generation
-- **[Partas.Solid](https://github.com/shayanhabibi/Partas.Solid)** - F# bindings for SolidJS
-- **[Fable](https://fable.io/)** - F# to JavaScript compiler
-- **[SolidJS](https://www.solidjs.com/)** - Fine-grained reactive UI library
-- **[Vite](https://vitejs.dev/)** - Build tooling
-- **[Tailwind CSS](https://tailwindcss.com/)** - Styling
+- **[FsExcel](https://github.com/misterspeedy/FsExcel)** (0.0.49) - Declarative Excel generation
+- **[Partas.Solid](https://github.com/shayanhabibi/Partas.Solid)** (2.1.3) - F# bindings for SolidJS
+- **[Fable](https://fable.io/)** (5.0.0-alpha.14) - F# to JavaScript compiler
+- **[SolidJS](https://www.solidjs.com/)** (1.9.x) - Fine-grained reactive UI library
+- **[Vite](https://vitejs.dev/)** (5.x) - Build tooling
+- **[Tailwind CSS](https://tailwindcss.com/)** (3.x) - Styling
+
+> **Note**: Fable 5.0.0-alpha.14 is required for compatibility with Partas.Solid.FablePlugin 2.1.3. Later Fable 5 alpha versions may have breaking changes with the plugin.
 
 ## Contributing
 

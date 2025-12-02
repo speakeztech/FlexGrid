@@ -1,9 +1,9 @@
-namespace FlexGrid.Solid
+namespace Partas.Solid.FlexGrid
 
 open Fable.Core
 open Fable.Core.JsInterop
-open Partas.Solid
-open FlexGrid
+open global.Partas.Solid
+open global.FlexGrid
 
 /// Module for rendering ReactiveModel to Partas.Solid components
 module Render =
@@ -38,12 +38,19 @@ module Render =
 
         registry
 
-    /// Create the cell component for a given position
-    let createCellComponent
+    /// Cell data for rendering - can be passed to the CellRenderer component
+    type CellData =
+        | InputData of signal: Accessor<float> * setter: (float -> unit) * format: string option * name: string
+        | FormulaData of signal: Accessor<float> * format: string option * formula: string
+        | LabelData of text: string
+        | EmptyData
+
+    /// Get the cell data for a given position
+    let getCellData
         (model: ReactiveModel)
         (registry: SignalRegistry)
         (row: int)
-        (col: int) : HtmlElement =
+        (col: int) : CellData =
 
         let maybeCell = ReactiveModel.tryGetCell row col model
 
@@ -52,34 +59,57 @@ module Render =
             match SignalRegistry.tryGetCellSignal col row registry,
                   SignalRegistry.tryGetCellSetter col row registry with
             | Some signal, Some setter ->
-                InputCell(
-                    signal = signal,
-                    setSignal = setter,
-                    format = format,
-                    name = name
-                ) :> HtmlElement
+                InputData(signal, setter, format, name)
             | _ ->
-                EmptyCell() :> HtmlElement
+                EmptyData
 
         | Some (ReactiveCell.Formula(expr, format)) ->
             match SignalRegistry.tryGetCellSignal col row registry with
             | Some signal ->
-                FormulaCell(
-                    signal = signal,
-                    format = format,
-                    formula = expr
-                ) :> HtmlElement
+                FormulaData(signal, format, expr)
             | None ->
-                EmptyCell() :> HtmlElement
+                EmptyData
 
         | Some (ReactiveCell.Label text) ->
-            LabelCell(text = text) :> HtmlElement
+            LabelData text
 
         | Some ReactiveCell.Empty ->
-            EmptyCell() :> HtmlElement
+            EmptyData
 
         | None ->
+            EmptyData
+
+/// Cell renderer component - renders the appropriate cell type based on data
+[<Erase>]
+type CellRenderer() =
+    inherit td()
+
+    [<Erase>]
+    member val cellData: Render.CellData = Render.EmptyData with get, set
+
+    [<SolidTypeComponent>]
+    member props.constructor =
+        match props.cellData with
+        | Render.InputData(signal, setter, format, name) ->
+            InputCell(
+                signal = signal,
+                setSignal = setter,
+                format = format,
+                name = name
+            ) :> HtmlElement
+        | Render.FormulaData(signal, format, formula) ->
+            FormulaCell(
+                signal = signal,
+                format = format,
+                formula = formula
+            ) :> HtmlElement
+        | Render.LabelData text ->
+            LabelCell(text = text) :> HtmlElement
+        | Render.EmptyData ->
             EmptyCell() :> HtmlElement
+
+module Render2 =
+    open Render
 
     /// Render a ReactiveModel as a Partas.Solid spreadsheet component
     [<SolidComponent>]
@@ -88,7 +118,8 @@ module Render =
         let rows, cols = ReactiveModel.dimensions model
 
         let getCellComponent row col =
-            createCellComponent model registry row col
+            let cellData = getCellData model registry row col
+            CellRenderer(cellData = cellData) :> HtmlElement
 
         Spreadsheet(
             title = model.Title,
