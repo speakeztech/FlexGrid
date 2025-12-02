@@ -5,6 +5,7 @@ export default {
     "./output/**/*.{js,jsx}",
     "./src/**/*.fs"
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {

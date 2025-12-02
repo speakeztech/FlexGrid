@@ -108,6 +108,10 @@ FlexGrid/
 │   ├── MortgageCalculator.fs     # Loan payment calculator
 │   └── App.fs                    # Demo application entry point
 │
+├── build/                        # FAKE build system
+│   ├── Build.fsproj              # Build project
+│   └── Build.fs                  # Build targets and tasks
+│
 └── tests/                        # Unit tests
     ├── FormulaParserTests.fs     # Parser correctness
     └── ReactiveEngineTests.fs    # Evaluation correctness
@@ -141,22 +145,44 @@ npm install
 
 ### Development
 
-```bash
-# Run tests
-dotnet test
+The project uses a FAKE-based build system that can be run with `dotnet run`:
 
+```bash
 # Start development server (compiles F# to JS and serves with hot reload)
+dotnet run --project build
+
+# Or use npm scripts directly:
 npm run dev
+```
+
+Available build targets (pass as argument to `dotnet run --project build`):
+
+| Target | Description |
+|--------|-------------|
+| `Dev` | **(default)** Compile and start Vite dev server |
+| `Watch` | Run Fable watch and Vite concurrently for hot reload |
+| `Compile` | Compile F# to JavaScript only |
+| `Build` | Production build (compile + Vite build) |
+| `Test` | Run unit tests |
+| `Preview` | Preview production build |
+| `Clean` | Clean output directories |
+| `All` | Run all targets (build + test) |
+
+```bash
+# Examples:
+dotnet run --project build -- Test     # Run tests
+dotnet run --project build -- Build    # Production build
+dotnet run --project build -- Watch    # Development with hot reload
 ```
 
 ### Building for Production
 
 ```bash
 # Build optimized output
-npm run build
+dotnet run --project build -- Build
 
 # Preview production build
-npm run preview
+dotnet run --project build -- Preview
 ```
 
 ## Defining Spreadsheets

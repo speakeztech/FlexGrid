@@ -5,8 +5,9 @@ open Fable.Core.JsInterop
 open global.Partas.Solid
 open global.FlexGrid
 
-/// Module for rendering ReactiveModel to Partas.Solid components
-module Render =
+/// Internal utilities for building reactive signal graphs from spreadsheet models
+[<AutoOpen>]
+module internal SignalBuilder =
 
     /// Import SolidJS createSignal
     [<Import("createSignal", "solid-js")>]
@@ -38,12 +39,16 @@ module Render =
 
         registry
 
-    /// Cell data for rendering - can be passed to the CellRenderer component
-    type CellData =
-        | InputData of signal: Accessor<float> * setter: (float -> unit) * format: string option * name: string
-        | FormulaData of signal: Accessor<float> * format: string option * formula: string
-        | LabelData of text: string
-        | EmptyData
+/// Discriminated union representing the data needed to render a cell
+type CellData =
+    | InputData of signal: Accessor<float> * setter: (float -> unit) * format: string option * name: string
+    | FormulaData of signal: Accessor<float> * format: string option * formula: string
+    | LabelData of text: string
+    | EmptyData
+
+/// Internal utilities for resolving cell data from model and registry
+[<AutoOpen>]
+module internal CellResolver =
 
     /// Get the cell data for a given position
     let getCellData
@@ -79,37 +84,37 @@ module Render =
         | None ->
             EmptyData
 
-/// Cell renderer component - renders the appropriate cell type based on data
+/// Cell renderer component - renders the appropriate cell type based on CellData
 [<Erase>]
 type CellRenderer() =
     inherit td()
 
     [<Erase>]
-    member val cellData: Render.CellData = Render.EmptyData with get, set
+    member val cellData: CellData = EmptyData with get, set
 
     [<SolidTypeComponent>]
     member props.constructor =
         match props.cellData with
-        | Render.InputData(signal, setter, format, name) ->
+        | InputData(signal, setter, format, name) ->
             InputCell(
                 signal = signal,
                 setSignal = setter,
                 format = format,
                 name = name
             ) :> HtmlElement
-        | Render.FormulaData(signal, format, formula) ->
+        | FormulaData(signal, format, formula) ->
             FormulaCell(
                 signal = signal,
                 format = format,
                 formula = formula
             ) :> HtmlElement
-        | Render.LabelData text ->
+        | LabelData text ->
             LabelCell(text = text) :> HtmlElement
-        | Render.EmptyData ->
+        | EmptyData ->
             EmptyCell() :> HtmlElement
 
-module Render2 =
-    open Render
+/// Public API for rendering ReactiveModel to SolidJS components
+module SpreadsheetRenderer =
 
     /// Render a ReactiveModel as a Partas.Solid spreadsheet component
     [<SolidComponent>]
@@ -117,9 +122,9 @@ module Render2 =
         let registry = buildRegistry model
         let rows, cols = ReactiveModel.dimensions model
 
-        let getCellComponent row col =
+        let getCellComponent = System.Func<int, int, HtmlElement>(fun row col ->
             let cellData = getCellData model registry row col
-            CellRenderer(cellData = cellData) :> HtmlElement
+            CellRenderer(cellData = cellData) :> HtmlElement)
 
         Spreadsheet(
             title = model.Title,

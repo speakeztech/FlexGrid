@@ -1,7 +1,11 @@
 namespace Partas.Solid.FlexGrid
 
 open Fable.Core
+open Fable.Core.JsInterop
 open global.Partas.Solid
+
+/// Type alias for cell component getter function (already uncurried in JS)
+type CellComponentGetter = System.Func<int, int, HtmlElement>
 
 /// Complete spreadsheet grid component
 [<Erase>]
@@ -16,9 +20,9 @@ type SpreadsheetGrid() =
     [<Erase>]
     member val cols: int = 0 with get, set
 
-    /// Function to get the cell component for a given position
+    /// Function to get the cell component for a given position (passed as System.Func to avoid uncurry2)
     [<Erase>]
-    member val getCellComponent: (int -> int -> HtmlElement) = Unchecked.defaultof<_> with get, set
+    member val getCellComponent: CellComponentGetter = Unchecked.defaultof<_> with get, set
 
     /// Whether to show column/row headers
     [<Erase>]
@@ -63,7 +67,7 @@ type SpreadsheetGrid() =
                         }
                         // Data cells
                         For(each = colIndices) { yield fun col _ ->
-                            props.getCellComponent row col
+                            props.getCellComponent.Invoke(row, col)
                         }
                     }
                 }
@@ -87,9 +91,9 @@ type Spreadsheet() =
     [<Erase>]
     member val cols: int = 0 with get, set
 
-    /// Cell component getter
+    /// Cell component getter (passed as System.Func to avoid uncurry2)
     [<Erase>]
-    member val getCellComponent: (int -> int -> HtmlElement) = Unchecked.defaultof<_> with get, set
+    member val getCellComponent: CellComponentGetter = Unchecked.defaultof<_> with get, set
 
     /// Show headers
     [<Erase>]
