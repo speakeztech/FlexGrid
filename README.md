@@ -1,5 +1,8 @@
 # FlexGrid
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE-MIT)
+[![Powered by Cloudflare](https://img.shields.io/badge/Powered%20by-Cloudflare-orange?logo=cloudflare&logoColor=white)](https://www.cloudflare.com)
+
 **A Demonstration of Reactive Functional Programming in Spreadsheets**
 
 <!-- TODO: Add presentation video link when available -->
