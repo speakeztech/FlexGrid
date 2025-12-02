@@ -1,6 +1,7 @@
 module FlexGrid.CLI.Program
 
 open System
+open System.Diagnostics
 open System.IO
 open System.Net.Http
 open System.Net.Http.Headers
@@ -8,22 +9,44 @@ open Argu
 open Spectre.Console
 
 type DeployArgs =
-    | [<AltCommandLine("-d")>] Directory of string
     | [<AltCommandLine("-p")>] Project of string
     | [<AltCommandLine("-v")>] Verbose
+    | [<AltCommandLine("--no-build")>] NoBuild
     interface IArgParserTemplate with
         member this.Usage =
             match this with
-            | Directory _ -> "Directory to deploy (defaults to ./dist)"
             | Project _ -> "Cloudflare Pages project name (defaults to 'flexgrid-demo')"
             | Verbose -> "Verbose output"
+            | NoBuild -> "Skip the build step (deploy existing dist folder)"
 
 type CliCommand =
     | [<CliPrefix(CliPrefix.None)>] Deploy of ParseResults<DeployArgs>
     interface IArgParserTemplate with
         member this.Usage =
             match this with
-            | Deploy _ -> "Deploy the built site to Cloudflare Pages"
+            | Deploy _ -> "Build and deploy the site to Cloudflare Pages"
+
+/// Run a shell command and return success/failure
+let runCommand (command: string) (args: string) (workingDir: string) (verbose: bool) : Result<unit, string> =
+    let psi = ProcessStartInfo(command, args)
+    psi.WorkingDirectory <- workingDir
+    psi.RedirectStandardOutput <- true
+    psi.RedirectStandardError <- true
+    psi.UseShellExecute <- false
+    psi.CreateNoWindow <- true
+
+    use proc = Process.Start(psi)
+    let stdout = proc.StandardOutput.ReadToEnd()
+    let stderr = proc.StandardError.ReadToEnd()
+    proc.WaitForExit()
+
+    if verbose && not (String.IsNullOrWhiteSpace(stdout)) then
+        AnsiConsole.MarkupLine($"        [grey]{Markup.Escape(stdout.Trim())}[/]")
+
+    if proc.ExitCode <> 0 then
+        Error (if String.IsNullOrWhiteSpace(stderr) then stdout else stderr)
+    else
+        Ok ()
 
 [<EntryPoint>]
 let main argv =
@@ -45,23 +68,46 @@ let main argv =
 
         match results.GetSubCommand() with
         | Deploy args ->
-            let directory = args.TryGetResult DeployArgs.Directory |> Option.defaultValue "./dist"
             let projectName = args.TryGetResult DeployArgs.Project |> Option.defaultValue "flexgrid-demo"
             let verbose = args.Contains DeployArgs.Verbose
+            let skipBuild = args.Contains DeployArgs.NoBuild
 
-            // Verify directory exists
-            let fullPath = Path.GetFullPath(directory)
-            if not (Directory.Exists(fullPath)) then
-                AnsiConsole.MarkupLine($"[red]Error:[/] Directory not found: {Markup.Escape(fullPath)}")
-                AnsiConsole.MarkupLine("")
-                AnsiConsole.MarkupLine("Run [cyan]npm run build[/] first to create the dist directory.")
-                exit 1
+            // Get project root (parent of cli directory)
+            let cliDir = AppContext.BaseDirectory
+            let projectRoot = Path.GetFullPath(Path.Combine(cliDir, "..", "..", "..", ".."))
+            let distDir = Path.Combine(projectRoot, "dist")
 
             AnsiConsole.MarkupLine($"[cyan]FlexGrid Pages Deployment[/]")
             AnsiConsole.MarkupLine("")
-            AnsiConsole.MarkupLine($"  Directory: {fullPath}")
             AnsiConsole.MarkupLine($"  Project: {projectName}")
             AnsiConsole.MarkupLine("")
+
+            // Step 1: Build
+            if not skipBuild then
+                AnsiConsole.MarkupLine("  [[1/3]] Building site...")
+
+                // Clean dist directory
+                if Directory.Exists(distDir) then
+                    if verbose then AnsiConsole.MarkupLine("        Cleaning dist directory...")
+                    Directory.Delete(distDir, true)
+
+                // Run npm run build
+                if verbose then AnsiConsole.MarkupLine("        Running npm run build...")
+                match runCommand "npm" "run build" projectRoot verbose with
+                | Error e ->
+                    AnsiConsole.MarkupLine($"[red]Error:[/] Build failed: {Markup.Escape(e)}")
+                    exit 1
+                | Ok () ->
+                    if not (Directory.Exists(distDir)) then
+                        AnsiConsole.MarkupLine($"[red]Error:[/] Build did not create dist directory")
+                        exit 1
+                    let fileCount = Directory.GetFiles(distDir, "*", SearchOption.AllDirectories).Length
+                    if verbose then AnsiConsole.MarkupLine($"        Found {fileCount} files in dist directory")
+            else
+                AnsiConsole.MarkupLine("  [[1/3]] Skipping build (--no-build)")
+                if not (Directory.Exists(distDir)) then
+                    AnsiConsole.MarkupLine($"[red]Error:[/] dist directory not found. Run without --no-build first.")
+                    exit 1
 
             // Create HTTP client with auth
             use httpClient = new HttpClient()
@@ -69,8 +115,8 @@ let main argv =
 
             let pages = PagesUploader.PagesOperations(httpClient, accountId)
 
-            // Check if project exists, create if not
-            AnsiConsole.MarkupLine("  [[1/2]] Checking project...")
+            // Step 2: Check if project exists, create if not
+            AnsiConsole.MarkupLine("  [[2/3]] Checking project...")
             let exists = pages.ProjectExists(projectName) |> Async.RunSynchronously
             if not exists then
                 AnsiConsole.MarkupLine($"        Creating project [cyan]{projectName}[/]...")
@@ -83,13 +129,13 @@ let main argv =
             else
                 if verbose then AnsiConsole.MarkupLine("        Project exists")
 
-            // Deploy
-            AnsiConsole.MarkupLine("  [[2/2]] Deploying...")
+            // Step 3: Deploy
+            AnsiConsole.MarkupLine("  [[3/3]] Deploying...")
             let progressCallback msg =
                 AnsiConsole.MarkupLine($"        {Markup.Escape(msg)}")
 
             let result =
-                pages.DeployDirectory projectName fullPath verbose progressCallback
+                pages.DeployDirectory projectName distDir verbose progressCallback
                 |> Async.RunSynchronously
 
             match result with

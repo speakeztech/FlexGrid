@@ -180,13 +180,9 @@ module App =
             | _ ->
                 SpreadsheetRenderer.SpreadsheetApp (CompoundInterest.build())
 
-        // Use wider container for side-by-side layout to prevent column text wrapping
-        let containerClass =
-            if isSideBySide() then "max-w-[90rem] mx-auto px-4"
-            else "max-w-6xl mx-auto px-4"
-
         div(class' = "min-h-screen bg-speakez-neutral-light dark:bg-speakez-neutral-dark py-8 transition-colors") {
-            div(class' = containerClass) {
+            // Use wider container for side-by-side layout to prevent column text wrapping
+            div(class' = (if isSideBySide() then "max-w-[90rem] mx-auto px-4" else "max-w-6xl mx-auto px-4")) {
                 // Header with controls
                 div(class' = "mb-8 flex justify-between items-start") {
                     div() {
@@ -243,9 +239,24 @@ module App =
                 }
 
                 // Footer
-                div(class' = "mt-8 text-center text-speakez-neutral/50 dark:text-speakez-neutral-light/50 text-sm") {
-                    p() {
-                        "FlexGrid - Reactive spreadsheets in F# with Partas.Solid, proving spreadsheets are functional programming"
+                footer(class' = "mt-12 pt-8 border-t border-speakez-neutral/20 dark:border-speakez-neutral-light/20 text-center") {
+                    // Copyright
+                    div(class' = "mb-4") {
+                        p(class' = "font-semibold text-speakez-neutral dark:text-speakez-neutral-light") {
+                            "SpeakEZ Technologies\u2122"
+                        }
+                        p(class' = "text-sm text-speakez-neutral/70 dark:text-speakez-neutral-light/70") {
+                            "\u00A9 2025 SpeakEZ Technologies. All rights reserved."
+                        }
+                    }
+                    // Legal links
+                    nav() {
+                        div(class' = "flex flex-wrap justify-center gap-4") {
+                            a(href = "https://speakez.tech/company/tos", target = "_blank", class' = "text-sm text-speakez-neutral/70 dark:text-speakez-neutral-light/70 hover:text-speakez-teal dark:hover:text-speakez-teal transition-colors") { "Terms" }
+                            a(href = "https://speakez.tech/company/disclaimer", target = "_blank", class' = "text-sm text-speakez-neutral/70 dark:text-speakez-neutral-light/70 hover:text-speakez-teal dark:hover:text-speakez-teal transition-colors") { "Disclaimer" }
+                            a(href = "https://speakez.tech/company/privacy", target = "_blank", class' = "text-sm text-speakez-neutral/70 dark:text-speakez-neutral-light/70 hover:text-speakez-teal dark:hover:text-speakez-teal transition-colors") { "Privacy" }
+                            a(href = "https://speakez.tech/company/contact", target = "_blank", class' = "text-sm text-speakez-neutral/70 dark:text-speakez-neutral-light/70 hover:text-speakez-teal dark:hover:text-speakez-teal transition-colors") { "Contact" }
+                        }
                     }
                 }
             }
