@@ -6,13 +6,13 @@
 
 ![FlexGrid Screenshot](screenshot-2025-12-02_18-30-13.png)
 
-## The Insight
+## The Truth Hiding in Plain Sight
 
-Over 1.5 billion people use spreadsheets daily. Every one of them is doing functional programming. They just don't use programming jargon.
+Over 1.5 billion people use spreadsheets daily. Every one of them is leveraging functional programming. They just don't use or even consider programming jargon.
 
 When a finance professional writes `=B1*(1+B2/100)^B3` to calculate compound interest, they've created a pure function: same inputs produce same outputs, no side effects, automatic dependency tracking. This is referential transparency. This is declarative programming. This is what functional programmers have advocated for decades.
 
-FlexGrid makes this connection concrete. It renders reactive spreadsheets in the browser using F# and SolidJS, showing that the F# function:
+FlexGrid shows how this connection is concrete. It renders reactive spreadsheets in the browser using F# and SolidJS, showing that the F# function:
 
 ```fsharp
 let futureValue principal rate years =
@@ -29,7 +29,11 @@ let futureValue principal rate years =
 
 ## Why This Matters
 
-Spreadsheets succeeded *because* of functional language design. The properties that make spreadsheet models trustworthy: predictable results, auditable calculation chains, no hidden state are precisely the properties that functional programming provides.
+Spreadsheets succeed *because* of functional language design. 
+
+> Simon Peyton-Jones, inventor of the Haskell functional programming language, also helped create the "Calc.ts" library for Excel Online. When he refers to Excel as 'functional programming for the masses' he's not speaking idly.
+
+The properties that make spreadsheet models trustworthy: predictable results, auditable calculation chains, no hidden state are precisely the properties that functional programming provides.
 
 When advocating for functional programming in your organization, you're not asking leadership to trust something foreign. You're asking them to recognize that the principles they already trust in their spreadsheets apply equally to the systems that run their business.
 
