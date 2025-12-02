@@ -1,12 +1,12 @@
 # FlexGrid
 
-**Reactive spreadsheets in F#, demonstrating that functional programming and spreadsheet computation share identical semantics.**
+**A Demonstration of Reactive Functional Programming in Spreadsheets**
 
 <!-- TODO: Add presentation video link when available -->
 
 ## The Insight
 
-Over 1.5 billion people use spreadsheets daily. Every one of them is doing functional programming—they just don't call it that.
+Over 1.5 billion people use spreadsheets daily. Every one of them is doing functional programming. They just don't use programming jargon.
 
 When a finance professional writes `=B1*(1+B2/100)^B3` to calculate compound interest, they've created a pure function: same inputs produce same outputs, no side effects, automatic dependency tracking. This is referential transparency. This is declarative programming. This is what functional programmers have advocated for decades.
 
