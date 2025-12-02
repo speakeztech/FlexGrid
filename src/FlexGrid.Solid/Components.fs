@@ -49,7 +49,10 @@ type InputCell() =
                 elif fmt.Contains("C") then
                     "$" + v.ToString("F2")
                 elif fmt.Contains("P") then
-                    (v * 100.0).ToString("F1") + "%"
+                    let decimals =
+                        fmt.Replace("P", "")
+                        |> fun s -> if s = "" then 2 else int s
+                    (v * 100.0).ToString($"F{decimals}") + "%"
                 else
                     v.ToString()
             | None -> v.ToString("F2")
@@ -59,10 +62,11 @@ type InputCell() =
             match System.Double.TryParse(target.value) with
             | true, v ->
                 let oldVal = props.signal()
-                props.setSignal v
-                // Log the input change
+                // Log the input change BEFORE setting the signal
+                // (setting the signal triggers all dependent recalculations synchronously)
                 let logger = GlobalCalcLogger.get()
                 CalcLogger.logInputChanged logger props.col props.row props.name oldVal v
+                props.setSignal v
             | false, _ -> () // Ignore invalid input
 
         td(class' = Styles.inputCell, title = props.name) {
@@ -111,7 +115,10 @@ type FormulaCell() =
                     elif fmt.Contains("C") then
                         "$" + v.ToString("F2")
                     elif fmt.Contains("P") then
-                        (v * 100.0).ToString("F1") + "%"
+                        let decimals =
+                            fmt.Replace("P", "")
+                            |> fun s -> if s = "" then 2 else int s
+                        (v * 100.0).ToString($"F{decimals}") + "%"
                     else
                         v.ToString()
                 | None -> v.ToString("F2")

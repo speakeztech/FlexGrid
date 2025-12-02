@@ -137,6 +137,37 @@ module SpreadsheetRenderer =
             showHeaders = model.ShowHeaders
         )
 
+    /// Render a ReactiveModel with a split: frozen top rows + scrollable bottom rows
+    /// splitAtRow is the first row of the scrollable section (0-indexed)
+    /// scrollableHeight is the CSS max-height for the entire scrollable container (e.g., "500px")
+    [<SolidComponent>]
+    let SpreadsheetSplitApp (model: ReactiveModel) (splitAtRow: int) (scrollableHeight: string) =
+        let registry = buildRegistry model
+        let totalRows, cols = ReactiveModel.dimensions model
+
+        let getCellComponent = System.Func<int, int, HtmlElement>(fun row col ->
+            let cellData = getCellData model registry row col
+            CellRenderer(cellData = cellData) :> HtmlElement)
+
+        div(class' = Styles.spreadsheetContainer) {
+            // Title
+            Show(when' = model.Title.IsSome) {
+                h2(class' = Styles.spreadsheetTitle) {
+                    model.Title |> Option.defaultValue ""
+                }
+            }
+
+            // Single table with sticky frozen rows - columns naturally align
+            SpreadsheetSplitGrid(
+                rows = totalRows,
+                cols = cols,
+                splitAtRow = splitAtRow,
+                scrollableHeight = scrollableHeight,
+                getCellComponent = getCellComponent,
+                showHeaders = model.ShowHeaders
+            )
+        }
+
     /// Create a standalone app component with mount logic
     [<SolidComponent>]
     let App (model: ReactiveModel) =

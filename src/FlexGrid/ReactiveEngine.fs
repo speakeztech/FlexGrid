@@ -196,11 +196,13 @@ module ReactiveEngine =
         | Some expr ->
             let computeFn = compileExpr registry expr
             let logger = GlobalCalcLogger.get()
-            // Wrap in createMemo with logging
+            // Wrap in createMemo with logging (skip logging for BLANK results)
             createMemo (fun () ->
-                CalcLogger.logFormulaEvaluating logger col row formula
                 let result = computeFn()
-                CalcLogger.logFormulaEvaluated logger col row formula result
+                // Don't log BLANK results (NegativeInfinity) to avoid flooding the log
+                if not (System.Double.IsNegativeInfinity(result)) then
+                    CalcLogger.logFormulaEvaluating logger col row formula
+                    CalcLogger.logFormulaEvaluated logger col row formula result
                 result
             )
         | None -> fun () -> nan

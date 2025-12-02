@@ -171,13 +171,22 @@ module App =
             else
                 window.localStorage.setItem("layout", "stacked")
 
-        let getModel () =
+        /// Render the appropriate spreadsheet based on current demo
+        let renderSpreadsheet () =
             match currentDemo() with
-            | "mortgage" -> MortgageCalculator.build()
-            | _ -> CompoundInterest.build()
+            | "mortgage" ->
+                let split = MortgageCalculator.build()
+                SpreadsheetRenderer.SpreadsheetSplitApp split.Model split.SplitAtRow split.ScrollableHeight
+            | _ ->
+                SpreadsheetRenderer.SpreadsheetApp (CompoundInterest.build())
+
+        // Use wider container for side-by-side layout to prevent column text wrapping
+        let containerClass =
+            if isSideBySide() then "max-w-[90rem] mx-auto px-4"
+            else "max-w-6xl mx-auto px-4"
 
         div(class' = "min-h-screen bg-speakez-neutral-light dark:bg-speakez-neutral-dark py-8 transition-colors") {
-            div(class' = "max-w-6xl mx-auto px-4") {
+            div(class' = containerClass) {
                 // Header with controls
                 div(class' = "mb-8 flex justify-between items-start") {
                     div() {
@@ -213,7 +222,7 @@ module App =
                     div(class' = "grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch") {
                         // Spreadsheet
                         div(class' = "card-speakez h-fit") {
-                            SpreadsheetRenderer.SpreadsheetApp (getModel())
+                            renderSpreadsheet()
                         }
                         // Calculation Log Panel - matches spreadsheet height
                         div(class' = "h-full") {
@@ -226,7 +235,7 @@ module App =
                     div() {
                         // Spreadsheet
                         div(class' = "card-speakez") {
-                            SpreadsheetRenderer.SpreadsheetApp (getModel())
+                            renderSpreadsheet()
                         }
                         // Calculation Log Panel (accordion)
                         LiveLogPanel(initialOpen = true, sideBySide = false)

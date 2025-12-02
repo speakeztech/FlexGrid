@@ -38,7 +38,7 @@ module CalcLogger =
     let create () : CalcLogger = {
         Entries = []
         Enabled = false
-        MaxEntries = 500
+        MaxEntries = 10000
     }
 
     /// Enable logging

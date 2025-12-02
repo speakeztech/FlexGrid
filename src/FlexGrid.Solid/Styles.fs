@@ -52,8 +52,8 @@ module Styles =
 
     // Log entry base style - themed borders
     let logEntry = "font-mono text-xs px-4 py-1 border-b border-speakez-neutral/10 dark:border-speakez-neutral-light/10"
-    // INPUT entries get a double-line bottom border to demarcate new calculation sets
-    let logEntryInput = "font-mono text-xs px-4 py-1 border-b-4 border-double border-speakez-neutral/30 dark:border-speakez-neutral-light/30"
+    // INPUT entries get a double-line bottom border to demarcate new calculation sets (yellow like the [INPUT] tag)
+    let logEntryInput = "font-mono text-xs px-4 py-1 border-b-4 border-double border-amber-500 dark:border-amber-400"
 
     // Log entry icon colors (the [EVAL], [CALC], etc. tags)
     let logIconInput = "text-amber-500 dark:text-amber-400"  // Yellow for INPUT

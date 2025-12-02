@@ -79,26 +79,32 @@ module FormulaParser =
         | _ -> left, remaining
 
     and parseAdditive tokens =
+        // Left-associative: a-b-c = (a-b)-c, not a-(b-c)
+        let rec loop left remaining =
+            match remaining with
+            | "+" :: rest ->
+                let right, afterRight = parseMultiplicative rest
+                loop (Expr.BinaryOp(left, "+", right)) afterRight
+            | "-" :: rest ->
+                let right, afterRight = parseMultiplicative rest
+                loop (Expr.BinaryOp(left, "-", right)) afterRight
+            | _ -> left, remaining
         let left, remaining = parseMultiplicative tokens
-        match remaining with
-        | "+" :: rest ->
-            let right, final = parseAdditive rest
-            Expr.BinaryOp(left, "+", right), final
-        | "-" :: rest ->
-            let right, final = parseAdditive rest
-            Expr.BinaryOp(left, "-", right), final
-        | _ -> left, remaining
+        loop left remaining
 
     and parseMultiplicative tokens =
+        // Left-associative: a/b/c = (a/b)/c, not a/(b/c)
+        let rec loop left remaining =
+            match remaining with
+            | "*" :: rest ->
+                let right, afterRight = parsePower rest
+                loop (Expr.BinaryOp(left, "*", right)) afterRight
+            | "/" :: rest ->
+                let right, afterRight = parsePower rest
+                loop (Expr.BinaryOp(left, "/", right)) afterRight
+            | _ -> left, remaining
         let left, remaining = parsePower tokens
-        match remaining with
-        | "*" :: rest ->
-            let right, final = parseMultiplicative rest
-            Expr.BinaryOp(left, "*", right), final
-        | "/" :: rest ->
-            let right, final = parseMultiplicative rest
-            Expr.BinaryOp(left, "/", right), final
-        | _ -> left, remaining
+        loop left remaining
 
     and parsePower tokens =
         let left, remaining = parseUnary tokens
