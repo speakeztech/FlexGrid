@@ -38,3 +38,18 @@ module Styles =
     /// Join multiple class strings
     let cn (classes: string seq) =
         classes |> String.concat " "
+
+    // LogPanel accordion styles
+    let logPanelContainer = "mt-4 border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden"
+    let logPanelHeader = "flex items-center justify-between px-4 py-2 bg-gray-100 dark:bg-gray-700 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+    let logPanelTitle = "font-semibold text-sm text-gray-700 dark:text-gray-200"
+    let logPanelToggle = "text-gray-500 dark:text-gray-400 transform transition-transform"
+    let logPanelContent = "max-h-64 overflow-y-auto bg-gray-900 dark:bg-gray-950 text-sm"
+    let logEntry = "font-mono text-xs px-4 py-1 border-b border-gray-800 dark:border-gray-900"
+    let logEntryInput = "text-yellow-400"
+    let logEntryEvaluating = "text-blue-400"
+    let logEntryEvaluated = "text-green-400"
+    let logEntryDependency = "text-purple-400"
+    let logPanelToolbar = "flex items-center gap-2 px-4 py-2 bg-gray-800 dark:bg-gray-900 border-b border-gray-700"
+    let logPanelButton = "px-2 py-1 text-xs bg-gray-700 dark:bg-gray-800 text-gray-300 rounded hover:bg-gray-600 dark:hover:bg-gray-700 transition-colors"
+    let logPanelButtonActive = "px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-500 transition-colors"

@@ -1,10 +1,12 @@
-# FsExcel.Reactive: A Partas.Solid Extension for Interactive Spreadsheet Demonstrations
+# FlexGrid Architecture
 
 ## Technical Design Document
 
+> **Historical Note**: This document was originally written as a design proposal for an FsExcel extension. The project evolved into FlexGrid, a standalone implementation that demonstrates reactive spreadsheets using F# and Partas.Solid without depending on FsExcel. The architectural concepts described here form the foundation of FlexGrid's design.
+
 ### Executive Summary
 
-This document specifies a proposed extension to FsExcel that enables reactive, browser-based spreadsheet demonstrations using Partas.Solid as the rendering framework. The extension bridges FsExcel's declarative spreadsheet DSL with SolidJS's fine-grained reactivity, producing self-contained HTML artifacts that demonstrate functional programming principles through interactive spreadsheet behavior.
+This document describes FlexGrid's architecture for reactive, browser-based spreadsheet demonstrations using Partas.Solid as the rendering framework. FlexGrid uses SolidJS's fine-grained reactivity to produce self-contained HTML artifacts that demonstrate functional programming principles through interactive spreadsheet behavior.
 
 The primary use case is live coding demonstrations where presenters can show audiences that F# functions and Excel formulas share identical semantics, with both executing reactively in real-time.
 

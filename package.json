@@ -1,7 +1,7 @@
 {
   "name": "flexgrid",
   "version": "0.1.0",
-  "description": "Reactive spreadsheet demonstrations bridging FsExcel with Partas.Solid",
+  "description": "Reactive spreadsheet demonstrations using F# and Partas.Solid - proving spreadsheets are functional programming",
   "type": "module",
   "scripts": {
     "restore": "dotnet restore",

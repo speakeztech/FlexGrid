@@ -57,6 +57,16 @@ The [ReactiveEngine](src/FlexGrid/ReactiveEngine.fs) compiles formula ASTs into 
 
 This is functional reactive programming—the same model that powers every spreadsheet's recalculation engine. When cell A1 changes, only cells that depend on A1 recompute. The dependency graph determines evaluation order automatically.
 
+### Calculation Logging
+
+The [CalcLog](src/FlexGrid/CalcLog.fs) module provides tracing of the reactive evaluation cascade. When enabled, it logs:
+
+- Input value changes
+- Formula evaluation start/completion
+- The propagation of changes through dependent cells
+
+This makes the "spreadsheets are functional programming" insight visible—you can watch the pure function evaluation cascade in real-time.
+
 ### Signal Registry
 
 Input cells create signals (reactive state containers). Formula cells create derived computations that read from those signals. The registry tracks:
@@ -74,17 +84,9 @@ The [FlexGrid.Solid](src/FlexGrid.Solid/) library provides UI components that re
 - **InputCell**: Editable cells bound to signals. Type a new value, and dependent cells update instantly.
 - **FormulaCell**: Read-only cells displaying computed values. Hover to see the underlying formula.
 - **SpreadsheetGrid**: The table structure with optional Excel-style headers (A, B, C... and 1, 2, 3...).
+- **LiveLogPanel**: Accordion panel showing the reactive calculation cascade in real-time.
 
 SolidJS's fine-grained reactivity means only the specific DOM nodes for changed cells update—no virtual DOM diffing, no unnecessary re-renders. This is the same optimization strategy that spreadsheet engines use.
-
-### Dual Rendering
-
-The same `ReactiveModel` can render to:
-
-- **Interactive HTML** via Partas.Solid (for live demonstrations)
-- **Excel files** via FsExcel/ClosedXML (for distribution)
-
-This shows the semantic equivalence: the model is the computation; the rendering is just presentation.
 
 ## Project Structure
 
@@ -94,13 +96,15 @@ FlexGrid/
 │   ├── FlexGrid/                 # Core library (no UI dependencies)
 │   │   ├── Model.fs              # ReactiveCell, ReactiveModel types
 │   │   ├── FormulaParser.fs      # Excel formula parser
+│   │   ├── CalcLog.fs            # Calculation tracing/logging
 │   │   ├── ReactiveEngine.fs     # Signal-based computation
-│   │   ├── Builder.fs            # DSL for constructing spreadsheets
-│   │   └── DualRender.fs         # Excel file generation
+│   │   └── Builder.fs            # DSL for constructing spreadsheets
 │   │
 │   └── FlexGrid.Solid/           # Browser UI components
+│       ├── Styles.fs             # Tailwind CSS class definitions
 │       ├── Components.fs         # InputCell, FormulaCell, etc.
 │       ├── Grid.fs               # SpreadsheetGrid component
+│       ├── LogPanel.fs           # Live calculation log accordion
 │       └── Render.fs             # Model-to-component transformation
 │
 ├── demos/                        # Example applications
@@ -230,7 +234,6 @@ Additional functions can be added to [ReactiveEngine.fs](src/FlexGrid/ReactiveEn
 
 ## Dependencies
 
-- **[FsExcel](https://github.com/misterspeedy/FsExcel)** (0.0.49) - Declarative Excel generation
 - **[Partas.Solid](https://github.com/shayanhabibi/Partas.Solid)** (2.1.3) - F# bindings for SolidJS
 - **[Fable](https://fable.io/)** (5.0.0-alpha.14) - F# to JavaScript compiler
 - **[SolidJS](https://www.solidjs.com/)** (1.9.x) - Fine-grained reactive UI library
@@ -259,6 +262,5 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 ## Acknowledgments
 
 - **Simon Peyton Jones** for the insight that "Excel is the world's most widely used functional programming language"
-- **Kit Eason** for [FsExcel](https://github.com/misterspeedy/FsExcel)
 - **Shayan Habibi** for [Partas.Solid](https://github.com/shayanhabibi/Partas.Solid)
 - The 1.5+ billion spreadsheet users who prove daily that functional programming dominates business return-of-value

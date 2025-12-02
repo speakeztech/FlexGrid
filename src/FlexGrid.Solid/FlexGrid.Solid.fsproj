@@ -22,6 +22,7 @@
     <Compile Include="Styles.fs" />
     <Compile Include="Components.fs" />
     <Compile Include="Grid.fs" />
+    <Compile Include="LogPanel.fs" />
     <Compile Include="Render.fs" />
   </ItemGroup>
 

@@ -28,20 +28,21 @@ module internal SignalBuilder =
                 SignalRegistry.registerNamedSignal name signal registry
             | _ -> ()
 
-        // Second pass: create derived signals for formula cells
+        // Second pass: create derived signals for formula cells with logging
         for posCell in model.Cells do
             match posCell.Cell with
             | ReactiveCell.Formula(expr, _) ->
                 let col, row = posCell.Position.Col, posCell.Position.Row
-                let formulaSignal = ReactiveEngine.createFormulaSignal registry expr
+                let formulaSignal = ReactiveEngine.createFormulaSignalAt registry col row expr
                 SignalRegistry.registerCellSignal col row formulaSignal registry
+                SignalRegistry.registerCellFormula col row expr registry
             | _ -> ()
 
         registry
 
 /// Discriminated union representing the data needed to render a cell
 type CellData =
-    | InputData of signal: Accessor<float> * setter: (float -> unit) * format: string option * name: string
+    | InputData of signal: Accessor<float> * setter: (float -> unit) * format: string option * name: string * col: int * row: int
     | FormulaData of signal: Accessor<float> * format: string option * formula: string
     | LabelData of text: string
     | EmptyData
@@ -64,7 +65,7 @@ module internal CellResolver =
             match SignalRegistry.tryGetCellSignal col row registry,
                   SignalRegistry.tryGetCellSetter col row registry with
             | Some signal, Some setter ->
-                InputData(signal, setter, format, name)
+                InputData(signal, setter, format, name, col, row)
             | _ ->
                 EmptyData
 
@@ -95,12 +96,14 @@ type CellRenderer() =
     [<SolidTypeComponent>]
     member props.constructor =
         match props.cellData with
-        | InputData(signal, setter, format, name) ->
+        | InputData(signal, setter, format, name, col, row) ->
             InputCell(
                 signal = signal,
                 setSignal = setter,
                 format = format,
-                name = name
+                name = name,
+                col = col,
+                row = row
             ) :> HtmlElement
         | FormulaData(signal, format, formula) ->
             FormulaCell(
@@ -137,8 +140,10 @@ module SpreadsheetRenderer =
     /// Create a standalone app component with mount logic
     [<SolidComponent>]
     let App (model: ReactiveModel) =
-        div(class' = "min-h-screen bg-gray-50 py-8") {
-            div(class' = "max-w-4xl mx-auto") {
+        div(class' = "min-h-screen bg-gray-50 dark:bg-gray-900 py-8") {
+            div(class' = "max-w-4xl mx-auto px-4") {
                 SpreadsheetApp model
+                // Add the live log panel accordion below the spreadsheet
+                LiveLogPanel()
             }
         }

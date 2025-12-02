@@ -129,6 +129,9 @@ module App =
                     SpreadsheetRenderer.SpreadsheetApp (getModel())
                 }
 
+                // Calculation Log Panel (accordion)
+                LiveLogPanel()
+
                 // F# Code comparison
                 div(class' = "mt-8 p-4 bg-gray-800 dark:bg-gray-950 rounded-lg") {
                     h3(class' = "text-white font-semibold mb-4") {
@@ -159,7 +162,7 @@ module App =
                 // Footer
                 div(class' = "mt-8 text-center text-gray-500 dark:text-gray-500 text-sm") {
                     p() {
-                        "FlexGrid - Bridging FsExcel with Partas.Solid for reactive spreadsheet demonstrations"
+                        "FlexGrid - Reactive spreadsheets in F# with Partas.Solid, proving spreadsheets are functional programming"
                     }
                 }
             }

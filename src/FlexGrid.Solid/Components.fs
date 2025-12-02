@@ -4,6 +4,7 @@ open Fable.Core
 open Fable.Core.JsInterop
 open Browser.Types
 open global.Partas.Solid
+open global.FlexGrid
 
 /// Input cell component: editable, creates a signal
 [<Erase>]
@@ -25,6 +26,14 @@ type InputCell() =
     /// The cell name (for display purposes)
     [<Erase>]
     member val name: string = "" with get, set
+
+    /// Column position for logging
+    [<Erase>]
+    member val col: int = 0 with get, set
+
+    /// Row position for logging
+    [<Erase>]
+    member val row: int = 0 with get, set
 
     [<SolidTypeComponent>]
     member props.constructor =
@@ -48,7 +57,12 @@ type InputCell() =
         let handleInput (e: Event) =
             let target = e.target :?> HTMLInputElement
             match System.Double.TryParse(target.value) with
-            | true, v -> props.setSignal v
+            | true, v ->
+                let oldVal = props.signal()
+                props.setSignal v
+                // Log the input change
+                let logger = GlobalCalcLogger.get()
+                CalcLogger.logInputChanged logger props.col props.row props.name oldVal v
             | false, _ -> () // Ignore invalid input
 
         td(class' = Styles.inputCell, title = props.name) {
@@ -100,15 +114,16 @@ type FormulaCell() =
                         v.ToString()
                 | None -> v.ToString("F2")
 
-        let value = props.signal()
-        let cellClass =
-            if System.Double.IsNaN(value) || System.Double.IsInfinity(value) then
+        let getCellClass (v: float) =
+            if System.Double.IsNaN(v) || System.Double.IsInfinity(v) then
                 Styles.errorCell
             else
                 Styles.formulaCell
 
-        td(class' = cellClass, title = props.formula) {
-            formatValue(value)
+        // Note: In SolidJS, reactivity requires signals to be called inside JSX
+        // We pass the accessor (props.signal) itself, and call it within the JSX expression
+        td(class' = getCellClass(props.signal()), title = props.formula) {
+            formatValue(props.signal())
         }
 
 /// Label cell component: static text

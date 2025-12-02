@@ -14,6 +14,7 @@ type SignalRegistry = {
     mutable CellSignals: Map<(int * int), Accessor<float>>
     mutable NamedSignals: Map<string, Accessor<float>>
     mutable CellSetters: Map<(int * int), Setter<float>>
+    mutable CellFormulas: Map<(int * int), string>
 }
 
 module SignalRegistry =
@@ -22,6 +23,7 @@ module SignalRegistry =
         CellSignals = Map.empty
         NamedSignals = Map.empty
         CellSetters = Map.empty
+        CellFormulas = Map.empty
     }
 
     /// Register a cell signal
@@ -48,7 +50,19 @@ module SignalRegistry =
     let tryGetCellSetter col row (registry: SignalRegistry) =
         Map.tryFind (col, row) registry.CellSetters
 
+    /// Register a cell formula
+    let registerCellFormula col row formula (registry: SignalRegistry) =
+        registry.CellFormulas <- Map.add (col, row) formula registry.CellFormulas
+
+    /// Try to get a cell formula
+    let tryGetCellFormula col row (registry: SignalRegistry) =
+        Map.tryFind (col, row) registry.CellFormulas
+
 module ReactiveEngine =
+
+    /// Import SolidJS createMemo for reactive derived values
+    [<Import("createMemo", "solid-js")>]
+    let private createMemo<'T> (fn: unit -> 'T) : Accessor<'T> = jsNative
 
     /// Compile an expression into a signal getter
     let rec compileExpr (registry: SignalRegistry) (expr: Expr) : Accessor<float> =
@@ -171,11 +185,26 @@ module ReactiveEngine =
         | Expr.Parenthesized inner ->
             compileExpr registry inner
 
-    /// Create a formula signal from a formula string
-    let createFormulaSignal (registry: SignalRegistry) (formula: string) : Accessor<float> =
+    /// Create a formula signal from a formula string with optional logging
+    /// Uses createMemo to make the computed value reactive - it will automatically
+    /// re-evaluate when any of its input signals change
+    let createFormulaSignalAt (registry: SignalRegistry) (col: int) (row: int) (formula: string) : Accessor<float> =
         match FormulaParser.tryParse formula with
-        | Some expr -> compileExpr registry expr
+        | Some expr ->
+            let computeFn = compileExpr registry expr
+            let logger = GlobalCalcLogger.get()
+            // Wrap in createMemo with logging
+            createMemo (fun () ->
+                CalcLogger.logFormulaEvaluating logger col row formula
+                let result = computeFn()
+                CalcLogger.logFormulaEvaluated logger col row formula result
+                result
+            )
         | None -> fun () -> nan
+
+    /// Create a formula signal from a formula string (without position info for logging)
+    let createFormulaSignal (registry: SignalRegistry) (formula: string) : Accessor<float> =
+        createFormulaSignalAt registry 0 0 formula
 
     /// Evaluate a formula string given the current registry state (non-reactive)
     let evaluateFormula (registry: SignalRegistry) (formula: string) : float =

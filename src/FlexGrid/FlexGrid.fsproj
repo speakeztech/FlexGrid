@@ -9,19 +9,14 @@
 
   <ItemGroup>
     <PackageReference Include="Fable.Core" Version="5.0.0-beta.1" />
-    <PackageReference Include="FsExcel" Version="0.0.49" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="Model.fs" />
     <Compile Include="FormulaParser.fs" />
+    <Compile Include="CalcLog.fs" />
     <Compile Include="ReactiveEngine.fs" />
     <Compile Include="Builder.fs" />
-  </ItemGroup>
-
-  <!-- DualRender.fs is excluded from Fable compilation as it depends on FsExcel/ClosedXML -->
-  <ItemGroup Condition="'$(Fable)' != 'True'">
-    <Compile Include="DualRender.fs" />
   </ItemGroup>
 
 </Project>

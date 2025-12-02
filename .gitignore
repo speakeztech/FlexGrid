@@ -489,6 +489,9 @@ output/
 # Vite build output
 dist/
 
+# Web build artifacts
+web/
+
 # npm/pnpm lock files (optional - can include if preferred)
 # package-lock.json
 # pnpm-lock.yaml
