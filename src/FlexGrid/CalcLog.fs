@@ -83,7 +83,7 @@ module CalcLogger =
             Formula = None
             OldValue = Some oldVal
             NewValue = Some newVal
-            Message = sprintf "Input '%s' changed: %.4f -> %.4f" name oldVal newVal
+            Message = sprintf "'%s' changed: %.4f -> %.4f" name oldVal newVal
         }
 
     /// Log start of formula evaluation
